@@ -1,8 +1,9 @@
 import BaseSeeder from '@ioc:Adonis/Lucid/Seeder'
 import Role from 'App/Models/Role'
+import User from 'App/Models/User'
 
 export default class extends BaseSeeder {
-  public async run () {
+  public async run() {
     // Write your database queries inside the run
     await Role.createMany([
       {
@@ -30,5 +31,13 @@ export default class extends BaseSeeder {
         description: 'Restaurateur',
       },
     ])
+
+    const role: Role = await Role.findBy('name', 'Administrateur')
+
+    const user = new User()
+    user.email = 'admin@domaine.com'
+    user.password = 'adminadmin'
+    await user.related('role').associate(role)
+    await user.save()
   }
 }

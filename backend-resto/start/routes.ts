@@ -29,6 +29,12 @@ Route
   .group(() => {
     Route
       .group(() => {
+        Route.get('/', 'RolesController.index')
+      })
+      .prefix('/roles')
+
+    Route
+      .group(() => {
         Route.post('/login', 'UsersController.login')
         Route.post('/register', 'UsersController.register')
         Route.post('/login-restaurateur', 'UsersController.loginRestaurateur')

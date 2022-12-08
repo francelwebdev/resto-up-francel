@@ -27,7 +27,7 @@ export default class RegisterRestaurateurValidator {
       numero_de_telephone: schema.string(),
       imei_du_telephone: schema.string(),
       indicatif_telephonique: schema.string(),
-      role_id: schema.string(),
+      role_id: schema.number(),
 
       raison_social: schema.string(),
       siret: schema.string(),

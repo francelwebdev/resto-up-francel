@@ -1,15 +1,16 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, manyToMany,
+import {
+  BaseModel, column, manyToMany,
   ManyToMany,
   belongsTo,
   BelongsTo,
   hasOne,
   HasOne,
   beforeSave
- } from '@ioc:Adonis/Lucid/Orm'
- import Role from 'App/Models/Role'
- import Restaurant from 'App/Models/Restaurant'
- import Hash from '@ioc:Adonis/Core/Hash'
+} from '@ioc:Adonis/Lucid/Orm'
+import Role from 'App/Models/Role'
+import Restaurant from 'App/Models/Restaurant'
+import Hash from '@ioc:Adonis/Core/Hash'
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
@@ -34,7 +35,7 @@ export default class User extends BaseModel {
   public numero_de_telephone: string
 
   @column()
-  public imei_du_téléphone: string
+  public imei_du_telephone: string
 
   @column()
   public indicatif_telephonique: string
