@@ -1,9 +1,10 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column,
+import {
+  BaseModel, column,
   belongsTo,
   BelongsTo
- } from '@ioc:Adonis/Lucid/Orm'
- import User from 'App/Models/User'
+} from '@ioc:Adonis/Lucid/Orm'
+import User from 'App/Models/User'
 
 export default class Restaurant extends BaseModel {
   @column({ isPrimary: true })
@@ -31,9 +32,9 @@ export default class Restaurant extends BaseModel {
   public piece_identite_gerant: string
 
   @column()
-  public proprietaireId: number
+  public proprietaire_id: number
 
-  @belongsTo(() => User)
+  @belongsTo(() => User, { foreignKey: 'proprietaire_id' })
   public proprietaire: BelongsTo<typeof User>
 
   @column.dateTime({ autoCreate: true })

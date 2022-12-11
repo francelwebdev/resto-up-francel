@@ -21,9 +21,9 @@
 import Route from '@ioc:Adonis/Core/Route'
 
 
-// Route.get('/', async () => {
-//   return { hello: 'world' }
-// })
+Route.get('/', async () => {
+  return { hello: 'world' }
+})
 
 Route
   .group(() => {
@@ -36,9 +36,24 @@ Route
     Route
       .group(() => {
         Route.post('/login', 'UsersController.login')
+
         Route.post('/register', 'UsersController.register')
+          .middleware(['auth', 'requireAdminUser'])
+
         Route.post('/login-restaurateur', 'UsersController.loginRestaurateur')
+
         Route.post('/register-restaurateur', 'UsersController.registerRestaurateur')
+
+        Route.post('/restaurateur-complete-registration', 'UsersController.restaurateurCompleteRegistration')
+          .middleware(['auth'])
+
+        Route.post('/verify-otp-code', 'UsersController.verifyOtpCode')
+
+        Route.get('/logout', 'UsersController.logout')
+          .middleware('auth')
+
+        Route.get('/:id/validate', 'UsersController.validateUser')
+          .middleware(['auth', 'requireAdminUser'])
       })
       .prefix('/users')
   })

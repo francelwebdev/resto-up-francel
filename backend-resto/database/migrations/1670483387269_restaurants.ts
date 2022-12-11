@@ -3,7 +3,7 @@ import BaseSchema from '@ioc:Adonis/Lucid/Schema'
 export default class extends BaseSchema {
   protected tableName = 'restaurants'
 
-  public async up () {
+  public async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id').primary()
 
@@ -14,7 +14,7 @@ export default class extends BaseSchema {
       table.string('prenom_gerant')
       table.string('email_de_contact')
       table.string('piece_identite_gerant')
-      table.integer('proprietaire_id').references('id').inTable('users')
+      table.integer('proprietaire_id').unsigned().references('id').inTable('users')//.onDelete('CASCADE')
 
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
@@ -24,7 +24,7 @@ export default class extends BaseSchema {
     })
   }
 
-  public async down () {
+  public async down() {
     this.schema.dropTable(this.tableName)
   }
 }

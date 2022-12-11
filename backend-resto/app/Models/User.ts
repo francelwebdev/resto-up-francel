@@ -41,12 +41,15 @@ export default class User extends BaseModel {
   public indicatif_telephonique: string
 
   @column()
+  public is_verified: boolean
+
+  @column()
   public roleId: number
 
   @belongsTo(() => Role)
   public role: BelongsTo<typeof Role>
 
-  @hasOne(() => Restaurant)
+  @hasOne(() => Restaurant, { foreignKey: 'proprietaire_id' })
   public restaurant: HasOne<typeof Restaurant>
 
   // @manyToMany(() => Role)

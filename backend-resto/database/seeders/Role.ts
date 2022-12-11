@@ -32,11 +32,12 @@ export default class extends BaseSeeder {
       },
     ])
 
-    const role: Role = await Role.findBy('name', 'Administrateur')
+    const role = await Role.findByOrFail('name', 'Administrateur')
 
     const user = new User()
     user.email = 'admin@domaine.com'
     user.password = 'adminadmin'
+    user.is_verified = true
     await user.related('role').associate(role)
     await user.save()
   }

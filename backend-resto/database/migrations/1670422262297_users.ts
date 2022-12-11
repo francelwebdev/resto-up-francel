@@ -8,7 +8,7 @@ export default class extends BaseSchema {
       table.increments('id').primary()
 
       table.string('email')
-      table.integer('code_otp')
+      table.string('code_otp')
       table.string('password')
       table.string('nom')
       table.string('prenom')
@@ -16,6 +16,8 @@ export default class extends BaseSchema {
       table.string('imei_du_telephone')
       table.string('indicatif_telephonique')
       table.integer('role_id').references('id').inTable('roles')
+      table.boolean('is_verified').defaultTo(false)
+
 
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL

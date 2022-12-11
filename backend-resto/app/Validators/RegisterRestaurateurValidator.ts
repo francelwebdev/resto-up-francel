@@ -1,8 +1,8 @@
-import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
+import { schema, CustomMessages, rules } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 export default class RegisterRestaurateurValidator {
-  constructor(protected ctx: HttpContextContract) {}
+  constructor(protected ctx: HttpContextContract) { }
 
   /*
    * Define schema to validate the "shape", "type", "formatting" and "integrity" of data.
@@ -24,18 +24,17 @@ export default class RegisterRestaurateurValidator {
    *    ```
    */
   public schema = schema.create({
-      numero_de_telephone: schema.string(),
-      imei_du_telephone: schema.string(),
-      indicatif_telephonique: schema.string(),
-      role_id: schema.number(),
+    numero_de_telephone: schema.string({}, [
+      rules.exists({ table: 'users', column: 'numero_de_telephone' })
+    ]),
 
-      raison_social: schema.string(),
-      siret: schema.string(),
-      adresse: schema.string(),
-      nom_gerant: schema.string(),
-      prenom_gerant: schema.string(),
-      email_de_contact: schema.string(),
-      piece_identite_gerant: schema.string(),
+    imei_du_telephone: schema.string({}, [
+      rules.exists({ table: 'users', column: 'imei_du_telephone' })
+    ]),
+
+    indicatif_telephonique: schema.string(),
+
+    role_id: schema.number(),
   })
 
   /**
