@@ -34,7 +34,9 @@ export default class RestaurateurCompleteRegistrationValidator {
 
     prenom_gerant: schema.string(),
 
-    email_de_contact: schema.string(),
+    email_de_contact: schema.string([
+      rules.email()
+    ]),
 
     piece_identite_gerant: schema.file({
       size: '2mb',

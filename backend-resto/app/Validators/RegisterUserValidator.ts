@@ -25,7 +25,7 @@ export default class RegisterUserValidator {
    */
   public schema = schema.create({
     email: schema.string({}, [
-      rules.exists({ table: 'users', column: 'email' }),
+      rules.unique({ table: 'users', column: 'email' }),
       rules.email()
     ]),
 
@@ -36,11 +36,15 @@ export default class RegisterUserValidator {
     prenom: schema.string(),
 
     numero_de_telephone: schema.string({}, [
-      rules.exists({ table: 'users', column: 'numero_de_telephone' })
+      rules.unique({ table: 'users', column: 'numero_de_telephone' })
     ]),
 
-    imei_du_telephone: schema.string(),
+    imei_du_telephone: schema.string({}, [
+      rules.unique({ table: 'users', column: 'imei_du_telephone' })
+    ]),
+
     indicatif_telephonique: schema.string(),
+
     role_id: schema.string(),
   })
 

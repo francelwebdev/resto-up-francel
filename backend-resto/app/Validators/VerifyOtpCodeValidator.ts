@@ -1,4 +1,4 @@
-import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
+import { schema, CustomMessages, rules } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 export default class VerifyOtpCodeValidator {
@@ -24,7 +24,10 @@ export default class VerifyOtpCodeValidator {
    *    ```
    */
   public schema = schema.create({
-    otp_code: schema.string(),
+    code_otp: schema.string({}, [
+      rules.maxLength(4),
+      rules.trim(),
+    ]),
   })
 
   /**

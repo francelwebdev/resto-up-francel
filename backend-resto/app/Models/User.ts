@@ -20,7 +20,7 @@ export default class User extends BaseModel {
   public email: string
 
   @column()
-  public code_otp: number
+  public code_otp: number | null
 
   @column({ serializeAs: null })
   public password: string

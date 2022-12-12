@@ -25,11 +25,11 @@ export default class RegisterRestaurateurValidator {
    */
   public schema = schema.create({
     numero_de_telephone: schema.string({}, [
-      rules.exists({ table: 'users', column: 'numero_de_telephone' })
+      rules.unique({ table: 'users', column: 'numero_de_telephone' })
     ]),
 
     imei_du_telephone: schema.string({}, [
-      rules.exists({ table: 'users', column: 'imei_du_telephone' })
+      rules.unique({ table: 'users', column: 'imei_du_telephone' })
     ]),
 
     indicatif_telephonique: schema.string(),

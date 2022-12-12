@@ -12,23 +12,42 @@ import Hash from '@ioc:Adonis/Core/Hash'
 
 
 export default class UsersController {
-  // public async index({}: HttpContextContract) {}
-
-  // public async create({}: HttpContextContract) {}
 
   public async validateUser({ auth, request, response, params }: HttpContextContract) {
+    const user = await User.findOrFail(params.id)
 
+    user.is_verified = true
+    user.save()
+
+    // Envoie d'un mail pour notifier l'utilisateur de la validation de son compte
+
+    return response.send({
+      data: user,
+      message: 'Utilisateur validé avec succès'
+    })
   }
 
   public async verifyOtpCode({ auth, request, response }: HttpContextContract) {
     const verifyOtpCodePayload = await request.validate(VerifyOtpCodeValidator)
+
+    const user = await User.findByOrFail('code_otp', verifyOtpCodePayload.code_otp)
+
+    user.code_otp = null
+    await user.save()
+
+    const token = await auth.use('api').generate(user)
+
+    return response.send({
+      data: { user, token },
+      message: 'Utilisateur authentifié avec succès'
+    })
   }
 
   public async logout({ auth, request, response }: HttpContextContract) {
     await auth.use('api').revoke()
 
     return {
-      revoked: true,
+      //  revoked: true,
       message: 'Déconnecté avec succès'
     }
   }
@@ -52,12 +71,12 @@ export default class UsersController {
     const token = await auth.use('api').generate(user)
 
     return response.send({
-      user: user,
-      token: token
+      data: { user, token },
+      message: 'Utilisateur authentifié avec succès'
     })
   }
 
-  public async register({ auth, request, response }: HttpContextContract) {
+  public async register({ request, response }: HttpContextContract) {
     const registerUserPayload = await request.validate(RegisterUserValidator)
 
     const role = await Role.findOrFail(registerUserPayload.role_id)
@@ -73,14 +92,30 @@ export default class UsersController {
     await user.related('role').associate(role)
     await user.save()
 
-    return response.send({
+    // Envoie de mail à l'utilisateur nouvellement crée
 
+    return response.send({
+      data: user,
+      message: 'Utilisateur enregistré avec succès'
     })
   }
 
   public async loginRestaurateur({ request, response }: HttpContextContract) {
     const loginRestaurateurPayload = await request.validate(LoginRestaurateurValidator)
 
+    const user = await User.findByOrFail('numero_de_telephone', loginRestaurateurPayload.numero_de_telephone)
+
+    const otpCode = Math.floor(1000 + Math.random() * 9000)
+
+    user.code_otp = otpCode
+    await user.save()
+
+    //  Envoie de code à 4 chiffre par SMS.
+
+    return response.send({
+      data: user,
+      message: 'Restaurateur'
+    })
   }
 
   public async registerRestaurateur({ request, response }: HttpContextContract) {
@@ -95,6 +130,10 @@ export default class UsersController {
     await user.related('role').associate(role)
     await user.save()
 
+    const otpCode = Math.floor(1000 + Math.random() * 9000)
+
+    //  Envoie de code à 4 chiffre par SMS.
+
     return response.send({
       data: user,
       message: 'Restaurateur inscrit avec succès'
@@ -103,6 +142,10 @@ export default class UsersController {
 
   public async restaurateurCompleteRegistration({ auth, request, response }: HttpContextContract) {
     const restaurateurCompleteRegistrationPayload = await request.validate(RestaurateurCompleteRegistrationValidator)
+
+    const piece_identite_gerant = request.file('piece_identite_gerant')
+
+    await piece_identite_gerant?.moveToDisk('./uploads/piece_identite_gerant/')
 
     const restaurateur = await User.findOrFail(auth.user?.id)
 
@@ -113,7 +156,7 @@ export default class UsersController {
     restaurant.nom_gerant = restaurateurCompleteRegistrationPayload.nom_gerant
     restaurant.prenom_gerant = restaurateurCompleteRegistrationPayload.prenom_gerant
     restaurant.email_de_contact = restaurateurCompleteRegistrationPayload.email_de_contact
-    restaurant.piece_identite_gerant = restaurateurCompleteRegistrationPayload.piece_identite_gerant
+    restaurant.piece_identite_gerant = piece_identite_gerant.fileName
     await restaurant.related('proprietaire').associate(restaurateur)
     await restaurant.save()
 
@@ -122,6 +165,5 @@ export default class UsersController {
       message: 'Restaurateur inscrit avec succès'
     })
   }
-
 
 }
