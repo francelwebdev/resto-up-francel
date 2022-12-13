@@ -54,6 +54,9 @@ Route
 
         Route.get('/:id/validate', 'UsersController.validateUser')
           .middleware(['auth', 'requireAdminUser'])
+
+        Route.post('/:id/change-role', 'UsersController.changeUserRole')
+          .middleware(['auth', 'requireAdminUser'])
       })
       .prefix('/users')
   })

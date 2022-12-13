@@ -11,8 +11,25 @@ import Restaurant from 'App/Models/Restaurant'
 import Hash from '@ioc:Adonis/Core/Hash'
 import { DateTime } from "luxon";
 import Mail from '@ioc:Adonis/Addons/Mail'
+import ChangeUserRoleValidator from 'App/Validators/ChangeUserRoleValidator'
 
 export default class UsersController {
+
+  public async changeUserRole({ request, response, params }: HttpContextContract) {
+    const changeUserRolePayload = await request.validate(ChangeUserRoleValidator)
+
+    const role = await Role.findOrFail(changeUserRolePayload.role_id)
+
+    const user = await User.findOrFail(params.id)
+
+    user.roleId = role.id
+    user.save()
+
+    return response.send({
+      data: user,
+      message: 'Role utilisateur modifié avec succès'
+    })
+  }
 
   public async validateUser({ auth, request, response, params }: HttpContextContract) {
     const user = await User.findOrFail(params.id)
@@ -21,6 +38,13 @@ export default class UsersController {
     user.save()
 
     // Envoie d'un mail pour notifier l'utilisateur de la validation de son compte
+    await Mail.sendLater((message) => {
+      message
+        .from('no-reply@resto-up.com')
+        .to(user.email)
+        .subject('New user validated from dashboard')
+        .htmlView('emails/new_user_validated_from_dashboard', { user })
+    })
 
     return response.send({
       data: user,
@@ -50,7 +74,7 @@ export default class UsersController {
     })
   }
 
-  public async logout({ auth, request, response }: HttpContextContract) {
+  public async logout({ auth }: HttpContextContract) {
     await auth.use('api').revoke()
 
     return {
@@ -82,7 +106,7 @@ export default class UsersController {
     })
   }
 
-  public async register({ auth, request, response }: HttpContextContract) {
+  public async register({ request, response }: HttpContextContract) {
     const registerUserPayload = await request.validate(RegisterUserValidator)
 
     const role = await Role.findOrFail(registerUserPayload.role_id)
@@ -169,7 +193,7 @@ export default class UsersController {
 
     const piece_identite_gerant = request.file('piece_identite_gerant')
 
-    await piece_identite_gerant?.moveToDisk('./uploads/piece_identite_gerant/')
+    await piece_identite_gerant?.moveToDisk('./uploads/piece_identite_gerant_restaurant/')
 
     const piece_identite_gerant_fileName = piece_identite_gerant?.fileName
 
