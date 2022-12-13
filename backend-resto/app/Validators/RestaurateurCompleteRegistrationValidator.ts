@@ -40,7 +40,7 @@ export default class RestaurateurCompleteRegistrationValidator {
 
     piece_identite_gerant: schema.file({
       size: '2mb',
-      extnames: ['jpg', 'png'],
+      extnames: ['jpg', 'jpeg', 'png'],
     }),
   })
 

@@ -9,7 +9,8 @@ import Role from 'App/Models/Role'
 import User from 'App/Models/User'
 import Restaurant from 'App/Models/Restaurant'
 import Hash from '@ioc:Adonis/Core/Hash'
-
+import { DateTime } from "luxon";
+import Mail from '@ioc:Adonis/Addons/Mail'
 
 export default class UsersController {
 
@@ -31,6 +32,12 @@ export default class UsersController {
     const verifyOtpCodePayload = await request.validate(VerifyOtpCodeValidator)
 
     const user = await User.findByOrFail('code_otp', verifyOtpCodePayload.code_otp)
+
+    if (DateTime.now() > DateTime.fromISO(user.code_otp_expire_at)) {
+      return response.status(400).send({
+        message: 'Code OTP expiré'
+      })
+    }
 
     user.code_otp = null
     await user.save()
@@ -61,7 +68,6 @@ export default class UsersController {
     const user = await User
       .query()
       .where('email', email)
-      .where('password', password)
       .firstOrFail()
 
     if (!(await Hash.verify(user.password, password))) {
@@ -76,14 +82,16 @@ export default class UsersController {
     })
   }
 
-  public async register({ request, response }: HttpContextContract) {
+  public async register({ auth, request, response }: HttpContextContract) {
     const registerUserPayload = await request.validate(RegisterUserValidator)
 
     const role = await Role.findOrFail(registerUserPayload.role_id)
 
+    const defaultPassword = Math.random().toString(36).slice(-8)
+
     const user = new User()
     user.email = registerUserPayload.email
-    user.password = registerUserPayload.password
+    user.password = defaultPassword
     user.nom = registerUserPayload.nom
     user.prenom = registerUserPayload.prenom
     user.numero_de_telephone = registerUserPayload.numero_de_telephone
@@ -93,6 +101,13 @@ export default class UsersController {
     await user.save()
 
     // Envoie de mail à l'utilisateur nouvellement crée
+    await Mail.sendLater((message) => {
+      message
+        .from('no-reply@resto-up.com')
+        .to(user.email)
+        .subject('New created user from dashboard')
+        .htmlView('emails/new_created_user_from_dashboard', { user, defaultPassword })
+    })
 
     return response.send({
       data: user,
@@ -103,7 +118,13 @@ export default class UsersController {
   public async loginRestaurateur({ request, response }: HttpContextContract) {
     const loginRestaurateurPayload = await request.validate(LoginRestaurateurValidator)
 
-    const user = await User.findByOrFail('numero_de_telephone', loginRestaurateurPayload.numero_de_telephone)
+    const role = await Role.findByOrFail('name', 'Restaurateur')
+
+    const user = await User
+      .query()
+      .where('numero_de_telephone', loginRestaurateurPayload.numero_de_telephone)
+      .where('role_id', role.id)
+      .firstOrFail()
 
     const otpCode = Math.floor(1000 + Math.random() * 9000)
 
@@ -123,19 +144,22 @@ export default class UsersController {
 
     const role = await Role.findOrFail(registerRestaurateurPayload.role_id)
 
+    const otpCode = Math.floor(1000 + Math.random() * 9000)
+
     const user = new User()
     user.numero_de_telephone = registerRestaurateurPayload.numero_de_telephone
     user.imei_du_telephone = registerRestaurateurPayload.imei_du_telephone
     user.indicatif_telephonique = registerRestaurateurPayload.indicatif_telephonique
+    user.code_otp = otpCode
+    user.code_otp_expire_at = DateTime.now().plus({ minutes: 5 }).toISO()
+
     await user.related('role').associate(role)
     await user.save()
-
-    const otpCode = Math.floor(1000 + Math.random() * 9000)
 
     //  Envoie de code à 4 chiffre par SMS.
 
     return response.send({
-      data: user,
+      data: { user, otpCode },
       message: 'Restaurateur inscrit avec succès'
     })
   }
@@ -147,6 +171,8 @@ export default class UsersController {
 
     await piece_identite_gerant?.moveToDisk('./uploads/piece_identite_gerant/')
 
+    const piece_identite_gerant_fileName = piece_identite_gerant?.fileName
+
     const restaurateur = await User.findOrFail(auth.user?.id)
 
     const restaurant = new Restaurant()
@@ -156,12 +182,12 @@ export default class UsersController {
     restaurant.nom_gerant = restaurateurCompleteRegistrationPayload.nom_gerant
     restaurant.prenom_gerant = restaurateurCompleteRegistrationPayload.prenom_gerant
     restaurant.email_de_contact = restaurateurCompleteRegistrationPayload.email_de_contact
-    restaurant.piece_identite_gerant = piece_identite_gerant.fileName
+    restaurant.piece_identite_gerant = piece_identite_gerant_fileName
     await restaurant.related('proprietaire').associate(restaurateur)
     await restaurant.save()
 
     return response.send({
-      data: await restaurant.related('proprietaire').query(),
+      data: restaurant,
       message: 'Restaurateur inscrit avec succès'
     })
   }

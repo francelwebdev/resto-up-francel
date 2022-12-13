@@ -22,6 +22,9 @@ export default class User extends BaseModel {
   @column()
   public code_otp: number | null
 
+  @column()
+  public code_otp_expire_at: string | null
+
   @column({ serializeAs: null })
   public password: string
 

@@ -2,7 +2,9 @@ import { DateTime } from 'luxon'
 import {
   BaseModel, column,
   belongsTo,
-  BelongsTo
+  BelongsTo,
+  hasMany,
+  HasMany
 } from '@ioc:Adonis/Lucid/Orm'
 import User from 'App/Models/User'
 
@@ -29,7 +31,7 @@ export default class Restaurant extends BaseModel {
   public email_de_contact: string
 
   @column()
-  public piece_identite_gerant: string
+  public piece_identite_gerant: string | null | undefined
 
   @column()
   public proprietaire_id: number

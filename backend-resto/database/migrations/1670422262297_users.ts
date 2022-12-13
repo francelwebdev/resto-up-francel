@@ -9,6 +9,7 @@ export default class extends BaseSchema {
 
       table.string('email')
       table.string('code_otp')
+      table.string('code_otp_expire_at')
       table.string('password')
       table.string('nom')
       table.string('prenom')
