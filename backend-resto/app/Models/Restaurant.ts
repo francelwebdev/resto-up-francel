@@ -16,10 +16,13 @@ export default class Restaurant extends BaseModel {
   public raison_social: string
 
   @column()
-  public siret: number
+  public siret: string
 
   @column()
   public adresse: string
+
+  @column()
+  public is_verified: boolean
 
   @column()
   public nom_gerant: string

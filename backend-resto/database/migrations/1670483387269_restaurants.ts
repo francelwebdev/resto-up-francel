@@ -8,13 +8,14 @@ export default class extends BaseSchema {
       table.increments('id').primary()
 
       table.string('raison_social').unique()
-      table.integer('siret').unique()
+      table.string('siret').unique()
       table.string('adresse')
       table.string('nom_gerant')
       table.string('prenom_gerant')
       table.string('email_de_contact')
       table.string('piece_identite_gerant')
-      table.integer('proprietaire_id').unsigned().references('id').inTable('users')//.onDelete('CASCADE')
+      table.integer('proprietaire_id').unsigned().references('id').inTable('users').onDelete('CASCADE')
+      table.boolean('is_verified').defaultTo(false)
 
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL

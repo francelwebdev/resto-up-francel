@@ -4,10 +4,8 @@ import RegisterRestaurateurValidator from 'App/Validators/RegisterRestaurateurVa
 import LoginUserValidator from 'App/Validators/LoginUserValidator'
 import LoginRestaurateurValidator from 'App/Validators/LoginRestaurateurValidator'
 import VerifyOtpCodeValidator from 'App/Validators/VerifyOtpCodeValidator'
-import RestaurateurCompleteRegistrationValidator from 'App/Validators/RestaurateurCompleteRegistrationValidator'
 import Role from 'App/Models/Role'
 import User from 'App/Models/User'
-import Restaurant from 'App/Models/Restaurant'
 import Hash from '@ioc:Adonis/Core/Hash'
 import { DateTime } from "luxon";
 import Mail from '@ioc:Adonis/Addons/Mail'
@@ -28,27 +26,6 @@ export default class UsersController {
     return response.send({
       data: user,
       message: 'Role utilisateur modifié avec succès'
-    })
-  }
-
-  public async validateUser({ auth, request, response, params }: HttpContextContract) {
-    const user = await User.findOrFail(params.id)
-
-    user.is_verified = true
-    user.save()
-
-    // Envoie d'un mail pour notifier l'utilisateur de la validation de son compte
-    await Mail.sendLater((message) => {
-      message
-        .from('no-reply@resto-up.com')
-        .to(user.email)
-        .subject('New user validated from dashboard')
-        .htmlView('emails/new_user_validated_from_dashboard', { user })
-    })
-
-    return response.send({
-      data: user,
-      message: 'Utilisateur validé avec succès'
     })
   }
 
@@ -184,34 +161,6 @@ export default class UsersController {
 
     return response.send({
       data: { user, otpCode },
-      message: 'Restaurateur inscrit avec succès'
-    })
-  }
-
-  public async restaurateurCompleteRegistration({ auth, request, response }: HttpContextContract) {
-    const restaurateurCompleteRegistrationPayload = await request.validate(RestaurateurCompleteRegistrationValidator)
-
-    const piece_identite_gerant = request.file('piece_identite_gerant')
-
-    await piece_identite_gerant?.moveToDisk('./uploads/piece_identite_gerant_restaurant/')
-
-    const piece_identite_gerant_fileName = piece_identite_gerant?.fileName
-
-    const restaurateur = await User.findOrFail(auth.user?.id)
-
-    const restaurant = new Restaurant()
-    restaurant.raison_social = restaurateurCompleteRegistrationPayload.raison_social
-    restaurant.siret = restaurateurCompleteRegistrationPayload.siret
-    restaurant.adresse = restaurateurCompleteRegistrationPayload.adresse
-    restaurant.nom_gerant = restaurateurCompleteRegistrationPayload.nom_gerant
-    restaurant.prenom_gerant = restaurateurCompleteRegistrationPayload.prenom_gerant
-    restaurant.email_de_contact = restaurateurCompleteRegistrationPayload.email_de_contact
-    restaurant.piece_identite_gerant = piece_identite_gerant_fileName
-    await restaurant.related('proprietaire').associate(restaurateur)
-    await restaurant.save()
-
-    return response.send({
-      data: restaurant,
       message: 'Restaurateur inscrit avec succès'
     })
   }

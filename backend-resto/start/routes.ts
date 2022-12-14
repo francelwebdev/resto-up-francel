@@ -44,21 +44,31 @@ Route
 
         Route.post('/register-restaurateur', 'UsersController.registerRestaurateur')
 
-        Route.post('/restaurateur-complete-registration', 'UsersController.restaurateurCompleteRegistration')
-          .middleware(['auth'])
-
         Route.post('/verify-otp-code', 'UsersController.verifyOtpCode')
 
         Route.get('/logout', 'UsersController.logout')
           .middleware('auth')
 
-        Route.get('/:id/validate', 'UsersController.validateUser')
-          .middleware(['auth', 'requireAdminUser'])
-
         Route.post('/:id/change-role', 'UsersController.changeUserRole')
           .middleware(['auth', 'requireAdminUser'])
       })
       .prefix('/users')
+
+    Route
+      .group(() => {
+        Route.get('/', 'RestaurateursController.index')
+        // .middleware('auth')
+
+        Route.get('/:id', 'RestaurateursController.show')
+        // .middleware('auth')
+
+        Route.get('/:id/validate', 'RestaurateursController.validateRestaurateur')
+          .middleware(['auth', 'requireAdminUser'])
+
+        Route.post('/:id/complete-registration', 'RestaurateursController.completeRegistration')
+          .middleware(['auth'])
+      })
+      .prefix('/restaurateurs')
   })
   .prefix('/api')
 

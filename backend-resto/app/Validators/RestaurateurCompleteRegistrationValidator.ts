@@ -26,7 +26,7 @@ export default class RestaurateurCompleteRegistrationValidator {
   public schema = schema.create({
     raison_social: schema.string(),
 
-    siret: schema.number(),
+    siret: schema.string(),
 
     adresse: schema.string(),
 
