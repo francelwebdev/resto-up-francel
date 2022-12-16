@@ -41,6 +41,7 @@ export default class UsersController {
     }
 
     user.code_otp = null
+    user.code_otp_expire_at = null
     await user.save()
 
     const token = await auth.use('api').generate(user)
